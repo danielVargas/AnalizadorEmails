@@ -31,8 +31,7 @@ fs.readFile('./salida.json', 'utf8', function(err, data) {
 			  else console.log("Se han ingresado los emails con éxito");
 		});
     }
-});
-*/
+});*/
 
 
 app.get('/listaremails', function(req, res){
@@ -43,3 +42,66 @@ app.get('/listaremails', function(req, res){
 	})
 	
 });
+
+
+app.get('/mails/:startTime/:endTime', function(req, res){
+    console.log('start timple ' + req.params.startTime + "endtime "+   req.params.endTime); 
+    var startTime   =  req.params.startTime;
+    var endTime = req.params.endTime;
+    var collec = ['emails'];
+    var db = mongojs(databaseUrl, collec);   
+    db.emails.find({ "date": { $gt: startTime } ,"date": { $lt: endTime } },function (err, docs) {
+        console.log(docs.length);
+        res.send(docs);
+    })
+    
+});
+
+
+/*
+//primer nivel :userId [startTime, endTime]
+URI: mails/?user=ID&startTime=2342&endTime=234234
+[{
+    timeStamp:34234234,
+    _id: 234234,
+    polarity:-1,
+    urgency:1
+},
+//...
+]
+
+/server.js/segundo nivel
+URI: mails/info/startTime=2342&endTime=234234
+[{
+    timeStamp:34234234,
+    _id: 234234,
+    polarity:-1,
+    urgency:1
+    subject: "texto del asunto"
+    from: "correo cliente"
+}
+]
+*/
+
+app.get('/mails/:idmail', function(req, res){
+    var idmail   =  req.params.idmail;
+    console.log("id: "  + idmail);
+    var ObjectId = require('mongodb').ObjectID;
+    var collec = ['emails'];
+    var db = mongojs(databaseUrl, collec);   
+    db.emails.find({ "_id":   new ObjectId(idmail) },function (err, docs) {
+        res.send(docs);
+    })
+});
+
+/*
+//detalle mail
+URI: mails/1231
+{
+    subject:
+    from:
+    to:
+    body:
+    date:
+    _id:
+}*/
