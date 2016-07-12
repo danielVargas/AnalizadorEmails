@@ -44,15 +44,26 @@ app.get('/listaremails', function(req, res){
 });
 
 
-app.get('/mails/:startTime/:endTime', function(req, res){
+app.get('/mails/info/:startTime/:endTime', function(req, res){
     console.log('start timple ' + req.params.startTime + "endtime "+   req.params.endTime); 
     var startTime   =  req.params.startTime;
     var endTime = req.params.endTime;
     var collec = ['emails'];
     var db = mongojs(databaseUrl, collec);   
-    db.emails.find({ "date": { $gt: startTime } ,"date": { $lt: endTime } },function (err, docs) {
+    db.emails.find({ "date": { $gt: startTime , $lt: endTime }},function (err, docs) {
         console.log(docs.length);
-        res.send(docs);
+        newdocs = []
+        for (var i = docs.length - 1; i >= 0; i--) {
+            
+            temp = { 
+                    "timeStamp" : docs[i].date , 
+                    "__id" : docs[i]._id,
+                    "popularity" : docs[i].popularity,
+                    "urgency": docs[i].urgency
+                }
+            newdocs.push(temp);
+        };
+        res.send(newdocs);
     })
     
 });
@@ -90,7 +101,20 @@ app.get('/mails/:idmail', function(req, res){
     var collec = ['emails'];
     var db = mongojs(databaseUrl, collec);   
     db.emails.find({ "_id":   new ObjectId(idmail) },function (err, docs) {
-        res.send(docs);
+        newdocs = []
+        for (var i = docs.length - 1; i >= 0; i--) {
+            
+            temp = { 
+                    "subject" : docs[i].subject,
+                    "from" : docs[i].from,
+                    "to" : docs[i].to,
+                    "body" : docs[i].body, 
+                    "date" : docs[i].date,
+                    "__id" : docs[i]._id
+                }
+            newdocs.push(temp);
+        };
+        res.send(newdocs);
     })
 });
 
