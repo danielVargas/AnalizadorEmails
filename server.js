@@ -10,6 +10,7 @@ var mongojs = require("mongojs");
 app.set('port', port);
 app.set('ip', ip);
 
+
 // launch ======================================================================
 http.createServer(app).listen(app.get('port') ,app.get('ip'), function () {
     console.log("✔ Express server listening at %s:%d ", app.get('ip'),app.get('port'));
@@ -43,6 +44,19 @@ app.get('/listaremails', function(req, res){
 	
 });
 
+/*
+/server.js/segundo nivel
+URI: mails/info/startTime=2342&endTime=234234
+[{
+    timeStamp:34234234,
+    _id: 234234,
+    polarity:-1,
+    urgency:1
+    subject: "texto del asunto"
+    from: "correo cliente"
+}
+]
+*/
 
 app.get('/mails/info/:startTime/:endTime', function(req, res){
     console.log('start timple ' + req.params.startTime + "endtime "+   req.params.endTime); 
@@ -79,20 +93,50 @@ URI: mails/?user=ID&startTime=2342&endTime=234234
     urgency:1
 },
 //...
-]
+] */
 
-/server.js/segundo nivel
-URI: mails/info/startTime=2342&endTime=234234
-[{
-    timeStamp:34234234,
-    _id: 234234,
-    polarity:-1,
-    urgency:1
-    subject: "texto del asunto"
-    from: "correo cliente"
-}
-]
-*/
+
+
+app.get('/mails/:userId/:startTime/:endTime', function(req, res){
+    console.log('userId '+ req.params.userId  +' start timple ' + req.params.startTime + " endtime "+   req.params.endTime); 
+    var startTime   =  req.params.startTime;
+    var endTime = req.params.endTime;
+    var userId = req.params.userId;
+    var collec = ['emails'];
+    var db = mongojs(databaseUrl, collec);   
+    db.emails.find({ "date": { $gt: startTime , $lt: endTime }, "user_id" : userId },function (err, docs) {
+        console.log(docs.length);
+        newdocs = []
+        for (var i = docs.length - 1; i >= 0; i--) {
+            
+            temp = { 
+                    "timeStamp" : docs[i].date , 
+                    "__id" : docs[i]._id,
+                    "popularity" : docs[i].popularity,
+                    "urgency": docs[i].urgency,
+                    "user_id": docs[i].user_id
+                }
+            newdocs.push(temp);
+        };
+        res.send(newdocs);
+    })
+    
+});
+
+
+/*
+//detalle mail
+URI: mails/1231
+{
+    subject:
+    from:
+    to:
+    body:
+    date:
+    _id:
+}*/
+
+
 
 app.get('/mails/:idmail', function(req, res){
     var idmail   =  req.params.idmail;
@@ -117,15 +161,3 @@ app.get('/mails/:idmail', function(req, res){
         res.send(newdocs);
     })
 });
-
-/*
-//detalle mail
-URI: mails/1231
-{
-    subject:
-    from:
-    to:
-    body:
-    date:
-    _id:
-}*/
