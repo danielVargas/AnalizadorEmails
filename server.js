@@ -71,7 +71,7 @@ app.get('/mails', function(req, res){
             temp = { 
                     "timeStamp" : docs[i].date , 
                     "__id" : docs[i]._id,
-                    "popularity" : docs[i].popularity,
+                    "polarity" : docs[i].polarity,
                     "urgency": docs[i].urgency,
                     "user_id": docs[i].user_id
                 }
@@ -109,7 +109,7 @@ app.get('/mails/info', function(req, res){
             temp = { 
                     "timeStamp" : docs[i].date , 
                     "__id" : docs[i]._id,
-                    "popularity" : docs[i].popularity,
+                    "polarity" : docs[i].polarity,
                     "urgency": docs[i].urgency,
                     "subject": docs[i].subject,
                     "from": docs[i].from
