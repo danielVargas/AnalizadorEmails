@@ -44,6 +44,44 @@ app.get('/listaremails', function(req, res){
 	
 });
 
+
+/*
+//primer nivel :userId [startTime, endTime]
+URI: mails/?user=ID&startTime=2342&endTime=234234
+[{
+    timeStamp:34234234,
+    _id: 234234,
+    polarity:-1,
+    urgency:1
+},
+//...
+] */
+
+app.get('/mails', function(req, res){
+    // http://localhost:8080/mails?userId=576f5b363df31edd0f3c8cbb&startTime=976743660.0&endTime=977743660.0
+    var startTime   =  req.param('startTime');
+    var endTime = req.param('endTime');
+    var userId = req.param('userId');
+    var collec = ['emails'];
+    var db = mongojs(databaseUrl, collec);   
+    db.emails.find({ "date": { $gt: startTime , $lt: endTime }, "user_id" : userId },function (err, docs) {
+        newdocs = []
+        for (var i = docs.length - 1; i >= 0; i--) {
+            
+            temp = { 
+                    "timeStamp" : docs[i].date , 
+                    "__id" : docs[i]._id,
+                    "popularity" : docs[i].popularity,
+                    "urgency": docs[i].urgency,
+                    "user_id": docs[i].user_id
+                }
+            newdocs.push(temp);
+        };
+        res.send(newdocs);
+    })
+    
+});
+
 /*
 /server.js/segundo nivel
 URI: mails/info/startTime=2342&endTime=234234
@@ -58,54 +96,13 @@ URI: mails/info/startTime=2342&endTime=234234
 ]
 */
 
-app.get('/mails/info/:startTime/:endTime', function(req, res){
-    console.log('start timple ' + req.params.startTime + "endtime "+   req.params.endTime); 
-    var startTime   =  req.params.startTime;
-    var endTime = req.params.endTime;
+app.get('/mails/info', function(req, res){
+    // http://localhost:8080/mails/info?startTime=976743660.0&endTime=977743660.0
+    var startTime   =  req.param('startTime');
+    var endTime = req.param('endTime');
     var collec = ['emails'];
     var db = mongojs(databaseUrl, collec);   
     db.emails.find({ "date": { $gt: startTime , $lt: endTime }},function (err, docs) {
-        console.log(docs.length);
-        newdocs = []
-        for (var i = docs.length - 1; i >= 0; i--) {
-            
-            temp = { 
-                    "timeStamp" : docs[i].date , 
-                    "__id" : docs[i]._id,
-                    "popularity" : docs[i].popularity,
-                    "urgency": docs[i].urgency
-                }
-            newdocs.push(temp);
-        };
-        res.send(newdocs);
-    })
-    
-});
-
-
-/*
-//primer nivel :userId [startTime, endTime]
-URI: mails/?user=ID&startTime=2342&endTime=234234
-[{
-    timeStamp:34234234,
-    _id: 234234,
-    polarity:-1,
-    urgency:1
-},
-//...
-] */
-
-
-
-app.get('/mails/:userId/:startTime/:endTime', function(req, res){
-    console.log('userId '+ req.params.userId  +' start timple ' + req.params.startTime + " endtime "+   req.params.endTime); 
-    var startTime   =  req.params.startTime;
-    var endTime = req.params.endTime;
-    var userId = req.params.userId;
-    var collec = ['emails'];
-    var db = mongojs(databaseUrl, collec);   
-    db.emails.find({ "date": { $gt: startTime , $lt: endTime }, "user_id" : userId },function (err, docs) {
-        console.log(docs.length);
         newdocs = []
         for (var i = docs.length - 1; i >= 0; i--) {
             
@@ -114,7 +111,8 @@ app.get('/mails/:userId/:startTime/:endTime', function(req, res){
                     "__id" : docs[i]._id,
                     "popularity" : docs[i].popularity,
                     "urgency": docs[i].urgency,
-                    "user_id": docs[i].user_id
+                    "subject": docs[i].subject,
+                    "from": docs[i].from
                 }
             newdocs.push(temp);
         };
